@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análisis de Cobertura Mediática CAMPORT 2023</title>
+    <title>Dashboard Interactivo CAMPORT 2023</title>
     <style>
         * {
             margin: 0;
@@ -13,24 +13,150 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f8f9fa;
             min-height: 100vh;
-            padding: 20px;
+            color: #2c3e50;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #667eea 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            opacity: 0.05;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            animation: float 20s infinite;
+            opacity: 0.3;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
         }
         
         h1 {
-            color: white;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s ease-in-out infinite alternate;
+            font-weight: 800;
         }
         
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.3)); }
+            to { filter: drop-shadow(0 0 20px rgba(118, 75, 162, 0.5)); }
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        /* Filter buttons */
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 12px 25px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.1);
+        }
+        
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+            z-index: -1;
+        }
+        
+        .filter-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .filter-btn:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Stats cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -40,60 +166,141 @@
         
         .stat-card {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            min-height: 150px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+        
+        .stat-card:hover::before {
+            animation: shine 0.5s ease;
+        }
+        
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+                opacity: 0;
+            }
+            50% { opacity: 1; }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+                opacity: 0;
+            }
         }
         
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
         }
         
         .stat-value {
             font-size: 2.5em;
             font-weight: bold;
-            color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 5px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .stat-label {
-            color: #666;
+            color: #6c757d;
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
         
+        .stat-trend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5em;
+            filter: grayscale(0%);
+        }
+        
+        /* Charts */
         .chart-container {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        .chart-container:hover {
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
         }
         
         .chart-title {
             font-size: 1.5em;
-            color: #333;
             margin-bottom: 20px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #2c3e50;
         }
         
-        .tier-bars {
+        .chart-icon {
+            font-size: 1.2em;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Animated bars */
+        .bar-chart {
             display: flex;
             justify-content: space-around;
             align-items: flex-end;
-            height: 300px;
+            height: 350px;
             margin-bottom: 20px;
+            margin-top: 40px;
+            position: relative;
+            padding: 0 20px;
         }
         
-        .bar-group {
+        .bar-wrapper {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            flex: 1;
-            margin: 0 10px;
+            justify-content: flex-end;
+            position: relative;
+            cursor: pointer;
+            max-width: 120px;
+            margin: 0 15px;
         }
         
         .bar {
@@ -102,51 +309,125 @@
             border-radius: 10px 10px 0 0;
             position: relative;
             transition: all 0.3s ease;
+            animation: growBar 1s ease forwards;
+            transform-origin: bottom;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        @keyframes growBar {
+            from {
+                transform: scaleY(0);
+            }
+            to {
+                transform: scaleY(1);
+            }
         }
         
         .bar:hover {
-            transform: scaleY(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transform: scaleY(1.1);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            filter: brightness(1.1);
         }
         
         .bar-value {
             position: absolute;
-            top: -30px;
+            top: -35px;
             left: 50%;
             transform: translateX(-50%);
             font-weight: bold;
-            color: #333;
+            font-size: 1.1em;
+            color: #764ba2;
+            opacity: 0;
+            animation: fadeIn 1s ease 0.5s forwards;
+            white-space: nowrap;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
         }
         
         .bar-label {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #666;
+            margin-top: 15px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.85em;
+            line-height: 1.3;
+            font-weight: 600;
         }
         
+        .bar-tooltip {
+            position: absolute;
+            bottom: calc(100% + 50px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 0.85em;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 100;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .bar-wrapper:hover .bar-tooltip {
+            opacity: 1;
+        }
+        
+        /* Media list */
         .media-list {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
         }
         
         .media-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            transition: background 0.3s ease;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .media-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .media-item:hover::before {
+            left: 100%;
         }
         
         .media-item:hover {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.15);
         }
         
         .media-name {
             font-weight: 600;
-            color: #333;
+            font-size: 1.1em;
+            color: #2c3e50;
         }
         
         .media-stats {
@@ -156,210 +437,889 @@
         }
         
         .media-count {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 0.9em;
+            font-weight: 600;
         }
         
         .media-value {
-            color: #764ba2;
             font-weight: bold;
+            color: #764ba2;
         }
         
-        .highlight {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .month-badges {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
+        /* Themes section */
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
             margin-top: 20px;
         }
         
-        .badge {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 20px;
-            border-radius: 20px;
+        .theme-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .theme-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .theme-card:hover::after {
+            transform: scaleX(1);
+        }
+        
+        .theme-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.02), rgba(118, 75, 162, 0.02));
+        }
+        
+        .theme-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .theme-title {
             font-weight: 600;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        
+        .theme-desc {
+            color: #6c757d;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        /* Counter animation */
+        .counter {
+            display: inline-block;
+        }
+        
+        /* Loading animation */
+        .loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 2000;
+        }
+        
+        .loader.active {
+            display: block;
+        }
+        
+        .loader-circle {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: #f093fb;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline-item {
+            display: flex;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .timeline-date {
+            min-width: 100px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .timeline-content {
+            flex: 1;
+            padding-left: 30px;
+            position: relative;
+            color: #495057;
+        }
+        
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .timeline-item:not(:last-child) .timeline-content::after {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: 15px;
+            width: 2px;
+            height: calc(100% + 20px);
+            background: linear-gradient(180deg, #667eea, #f093fb);
+            opacity: 0.3;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .bar-chart { flex-direction: column; height: auto; gap: 30px; }
+            .bar { width: 200px; height: 40px !important; }
+            .themes-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+    <div class="bg-animation"></div>
+    <div class="particles" id="particles"></div>
+    
     <div class="container">
-        <h1>📊 Análisis de Cobertura Mediática CAMPORT 2023</h1>
+        <h1>📊 Dashboard Interactivo CAMPORT</h1>
+        <div class="subtitle">Análisis de Cobertura Mediática 2023 | Junio - Diciembre</div>
         
-        <div class="highlight">
-            <h2 style="margin-bottom: 10px;">Inversión Total en Medios</h2>
-            <div class="stat-value" style="font-size: 3em; color: white;">$129,656,504</div>
-            <div class="month-badges">
-                <span class="badge">Junio - Diciembre 2023</span>
-                <span class="badge">50 Publicaciones</span>
-            </div>
+        <!-- Filter buttons -->
+        <div class="filter-container">
+            <button class="filter-btn active" onclick="filterData('all')">Todo</button>
+            <button class="filter-btn" onclick="filterData('tier1')">Tier 1</button>
+            <button class="filter-btn" onclick="filterData('tier2')">Tier 2</button>
+            <button class="filter-btn" onclick="filterData('tier3')">Tier 3</button>
+            <button class="filter-btn" onclick="filterData('themes')">Temas</button>
+            <button class="filter-btn" onclick="filterData('timeline')">Timeline</button>
         </div>
         
+        <!-- Stats cards -->
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value">26</div>
-                <div class="stat-label">Publicaciones Tier 1</div>
+            <div class="stat-card" onclick="showDetail('total')">
+                <div class="stat-trend">📈</div>
+                <div class="stat-value">$<span class="counter" data-target="129.6">0</span>M</div>
+                <div class="stat-label">Inversión Total</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">20</div>
-                <div class="stat-label">Publicaciones Tier 2</div>
+            <div class="stat-card" onclick="showDetail('publications')">
+                <div class="stat-trend">📰</div>
+                <div class="stat-value"><span class="counter" data-target="50">0</span></div>
+                <div class="stat-label">Publicaciones</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">4</div>
-                <div class="stat-label">Publicaciones Tier 3</div>
+            <div class="stat-card" onclick="showDetail('reach')">
+                <div class="stat-trend">🎯</div>
+                <div class="stat-value"><span class="counter" data-target="26">0</span></div>
+                <div class="stat-label">Medios Tier 1</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">$2,593,130</div>
-                <div class="stat-label">Promedio por Publicación</div>
-            </div>
-        </div>
-        
-        <div class="chart-container">
-            <h3 class="chart-title">Distribución por Tier de Medios</h3>
-            <div class="tier-bars">
-                <div class="bar-group">
-                    <div class="bar" style="height: 250px;">
-                        <div class="bar-value">$105,026,007</div>
-                    </div>
-                    <div class="bar-label">Tier 1 (Premium)</div>
-                </div>
-                <div class="bar-group">
-                    <div class="bar" style="height: 100px;">
-                        <div class="bar-value">$22,310,497</div>
-                    </div>
-                    <div class="bar-label">Tier 2 (Estándar)</div>
-                </div>
-                <div class="bar-group">
-                    <div class="bar" style="height: 20px;">
-                        <div class="bar-value">$2,320,000</div>
-                    </div>
-                    <div class="bar-label">Tier 3 (Básico)</div>
-                </div>
+            <div class="stat-card" onclick="showDetail('average')">
+                <div class="stat-trend">💰</div>
+                <div class="stat-value">$<span class="counter" data-target="2.59">0</span>M</div>
+                <div class="stat-label">Promedio/Publicación</div>
             </div>
         </div>
         
-        <div class="media-list">
-            <h3 class="chart-title">Top 10 Medios por Valor de Inversión</h3>
+        <!-- Bar chart -->
+        <div class="chart-container" id="barChartContainer">
+            <h3 class="chart-title">
+                <span class="chart-icon">📊</span>
+                Distribución por Tier (Click para detalles)
+            </h3>
+            <div class="bar-chart" id="barChart">
+                <div class="bar-wrapper" onclick="showTierDetail(1)">
+                    <div class="bar-tooltip">26 publicaciones<br/>81% del valor total</div>
+                    <div class="bar" style="height: 260px;" data-tier="1">
+                        <div class="bar-value">$105M</div>
+                    </div>
+                    <div class="bar-label">Tier 1<br/>Premium</div>
+                </div>
+                <div class="bar-wrapper" onclick="showTierDetail(2)">
+                    <div class="bar-tooltip">20 publicaciones<br/>17% del valor total</div>
+                    <div class="bar" style="height: 110px;" data-tier="2">
+                        <div class="bar-value">$22.3M</div>
+                    </div>
+                    <div class="bar-label">Tier 2<br/>Estándar</div>
+                </div>
+                <div class="bar-wrapper" onclick="showTierDetail(3)">
+                    <div class="bar-tooltip">4 publicaciones<br/>2% del valor total</div>
+                    <div class="bar" style="height: 30px;" data-tier="3">
+                        <div class="bar-value">$2.3M</div>
+                    </div>
+                    <div class="bar-label">Tier 3<br/>Básico</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Media list -->
+        <div class="media-list" id="mediaList">
+            <h3 class="chart-title">
+                <span class="chart-icon">🏆</span>
+                Top Medios por Inversión (Click para explorar)
+            </h3>
             
-            <div class="media-item">
+            <div class="media-item" onclick="showMediaDetail('El Mercurio', 9, 72325846)">
                 <div class="media-name">El Mercurio</div>
                 <div class="media-stats">
                     <span class="media-count">9 publicaciones</span>
-                    <span class="media-value">$72,325,846</span>
+                    <span class="media-value">$72.3M</span>
                 </div>
             </div>
             
-            <div class="media-item">
+            <div class="media-item" onclick="showMediaDetail('La Tercera', 3, 17404862)">
                 <div class="media-name">La Tercera / Pulso</div>
                 <div class="media-stats">
                     <span class="media-count">3 publicaciones</span>
-                    <span class="media-value">$17,404,862</span>
+                    <span class="media-value">$17.4M</span>
                 </div>
             </div>
             
-            <div class="media-item">
+            <div class="media-item" onclick="showMediaDetail('Portal Portuario', 11, 5610000)">
                 <div class="media-name">Portal Portuario</div>
                 <div class="media-stats">
                     <span class="media-count">11 publicaciones</span>
-                    <span class="media-value">$5,610,000</span>
+                    <span class="media-value">$5.6M</span>
                 </div>
             </div>
             
-            <div class="media-item">
+            <div class="media-item" onclick="showMediaDetail('Mundo Marítimo', 9, 4590000)">
                 <div class="media-name">Mundo Marítimo</div>
                 <div class="media-stats">
                     <span class="media-count">9 publicaciones</span>
-                    <span class="media-value">$4,590,000</span>
+                    <span class="media-value">$4.6M</span>
                 </div>
             </div>
             
-            <div class="media-item">
+            <div class="media-item" onclick="showMediaDetail('Diario Financiero', 4, 5817215)">
                 <div class="media-name">Diario Financiero</div>
                 <div class="media-stats">
                     <span class="media-count">4 publicaciones</span>
-                    <span class="media-value">$5,817,215</span>
-                </div>
-            </div>
-            
-            <div class="media-item">
-                <div class="media-name">Marítimo Portuario</div>
-                <div class="media-stats">
-                    <span class="media-count">3 publicaciones</span>
-                    <span class="media-value">$1,530,000</span>
-                </div>
-            </div>
-            
-            <div class="media-item">
-                <div class="media-name">El Mercurio de Valparaíso</div>
-                <div class="media-stats">
-                    <span class="media-count">3 publicaciones</span>
-                    <span class="media-value">$1,499,441</span>
-                </div>
-            </div>
-            
-            <div class="media-item">
-                <div class="media-name">EMOL</div>
-                <div class="media-stats">
-                    <span class="media-count">1 publicación</span>
-                    <span class="media-value">$1,400,000</span>
-                </div>
-            </div>
-            
-            <div class="media-item">
-                <div class="media-name">Soy Chile</div>
-                <div class="media-stats">
-                    <span class="media-count">2 publicaciones</span>
-                    <span class="media-value">$1,020,000</span>
-                </div>
-            </div>
-            
-            <div class="media-item">
-                <div class="media-name">El Mostrador</div>
-                <div class="media-stats">
-                    <span class="media-count">1 publicación</span>
-                    <span class="media-value">$790,000</span>
+                    <span class="media-value">$5.8M</span>
                 </div>
             </div>
         </div>
         
-        <div class="chart-container">
-            <h3 class="chart-title">Temas Principales Cubiertos</h3>
-            <div style="padding: 20px;">
-                <ul style="list-style: none; padding: 0;">
-                    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 10px; border-left: 4px solid #667eea; border-radius: 5px;">
-                        <strong>📦 Cabotaje Marítimo:</strong> Promoción de la apertura y liberación del cabotaje para reducir costos logísticos
-                    </li>
-                    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 10px; border-left: 4px solid #764ba2; border-radius: 5px;">
-                        <strong>📊 Desempeño Logístico:</strong> Análisis del deterioro en el ranking de desempeño logístico de Chile
-                    </li>
-                    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 10px; border-left: 4px solid #f093fb; border-radius: 5px;">
-                        <strong>🚢 Infraestructura Portuaria:</strong> Necesidad de expansión en puertos de Valparaíso, San Antonio y otros
-                    </li>
-                    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 10px; border-left: 4px solid #f5576c; border-radius: 5px;">
-                        <strong>📉 Comercio Exterior:</strong> Caída del 6.8% en toneladas movilizadas y 14.7% en retornos en dólares
-                    </li>
-                    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 10px; border-left: 4px solid #667eea; border-radius: 5px;">
-                        <strong>🔒 Seguridad Portuaria:</strong> Preocupación por crimen organizado y necesidad de alianza público-privada
-                    </li>
-                    <li style="padding: 10px; background: #f8f9fa; margin-bottom: 10px; border-left: 4px solid #764ba2; border-radius: 5px;">
-                        <strong>📈 Tasas de Ocupación:</strong> Cinco puertos superan el 70% de ocupación, requiriendo inversiones urgentes
-                    </li>
-                </ul>
+        <!-- Themes section -->
+        <div class="chart-container" id="themesSection" style="display: none;">
+            <h3 class="chart-title">
+                <span class="chart-icon">🎯</span>
+                Temas Estratégicos Cubiertos
+            </h3>
+            <div class="themes-grid">
+                <div class="theme-card" onclick="showThemeDetail('cabotaje')">
+                    <div class="theme-icon">🚢</div>
+                    <div class="theme-title">Cabotaje Marítimo</div>
+                    <div class="theme-desc">Apertura y liberación para reducir costos logísticos</div>
+                </div>
+                <div class="theme-card" onclick="showThemeDetail('logistica')">
+                    <div class="theme-icon">📊</div>
+                    <div class="theme-title">Desempeño Logístico</div>
+                    <div class="theme-desc">Análisis del deterioro en rankings internacionales</div>
+                </div>
+                <div class="theme-card" onclick="showThemeDetail('infraestructura')">
+                    <div class="theme-icon">🏗️</div>
+                    <div class="theme-title">Infraestructura</div>
+                    <div class="theme-desc">Expansión urgente en puertos principales</div>
+                </div>
+                <div class="theme-card" onclick="showThemeDetail('comercio')">
+                    <div class="theme-icon">📉</div>
+                    <div class="theme-title">Comercio Exterior</div>
+                    <div class="theme-desc">Caída del 6.8% en toneladas movilizadas</div>
+                </div>
+                <div class="theme-card" onclick="showThemeDetail('seguridad')">
+                    <div class="theme-icon">🔒</div>
+                    <div class="theme-title">Seguridad Portuaria</div>
+                    <div class="theme-desc">Alianza contra el crimen organizado</div>
+                </div>
+                <div class="theme-card" onclick="showThemeDetail('ocupacion')">
+                    <div class="theme-icon">⚠️</div>
+                    <div class="theme-title">Tasas de Ocupación</div>
+                    <div class="theme-desc">5 puertos superan el 70% de capacidad</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timeline section -->
+        <div class="chart-container" id="timelineSection" style="display: none;">
+            <h3 class="chart-title">
+                <span class="chart-icon">📅</span>
+                Línea de Tiempo de Publicaciones
+            </h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">Junio</div>
+                    <div class="timeline-content">
+                        <strong>Inicio de monitoreo</strong><br>
+                        Primeras alertas sobre desempeño logístico
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Julio</div>
+                    <div class="timeline-content">
+                        <strong>Ocupación crítica</strong><br>
+                        5 puertos superan 70% de capacidad
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Agosto</div>
+                    <div class="timeline-content">
+                        <strong>Expansión Valparaíso</strong><br>
+                        Urgencia por ampliar puerto principal
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Octubre</div>
+                    <div class="timeline-content">
+                        <strong>Campaña Cabotaje</strong><br>
+                        Push legislativo para apertura
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Diciembre</div>
+                    <div class="timeline-content">
+                        <strong>Balance anual</strong><br>
+                        Caída 6.8% en comercio exterior
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    
+    <!-- Modal -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-header" id="modalHeader">Detalles</div>
+            <div id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-circle"></div>
+    </div>
+    
+    <script>
+        // Create particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        createParticles();
+        
+        // Animated counter
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = parseFloat(counter.dataset.target);
+                const increment = target / 100;
+                let current = 0;
+                
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        counter.textContent = current.toFixed(target % 1 !== 0 ? 1 : 0);
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = target.toFixed(target % 1 !== 0 ? 1 : 0);
+                    }
+                };
+                
+                updateCounter();
+            });
+        }
+        
+        // Run counter animation on page load
+        setTimeout(animateCounters, 500);
+        
+        // Filter functionality
+        function filterData(type) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show loader
+            const loader = document.getElementById('loader');
+            loader.classList.add('active');
+            
+            // Simulate data loading
+            setTimeout(() => {
+                loader.classList.remove('active');
+                
+                // Update display based on filter
+                const themesSection = document.getElementById('themesSection');
+                const mediaList = document.getElementById('mediaList');
+                const barChart = document.getElementById('barChartContainer');
+                const timelineSection = document.getElementById('timelineSection');
+                
+                // Hide all sections first
+                themesSection.style.display = 'none';
+                mediaList.style.display = 'none';
+                barChart.style.display = 'none';
+                timelineSection.style.display = 'none';
+                
+                if (type === 'themes') {
+                    themesSection.style.display = 'block';
+                } else if (type === 'timeline') {
+                    timelineSection.style.display = 'block';
+                } else {
+                    mediaList.style.display = 'block';
+                    barChart.style.display = 'block';
+                    
+                    // Animate bars
+                    if (type !== 'all') {
+                        updateBars(type);
+                    }
+                }
+                
+                // Update stats
+                updateStats(type);
+            }, 500);
+        }
+        
+        function updateBars(filter) {
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach(bar => {
+                const tier = bar.dataset.tier;
+                if (filter === 'tier' + tier) {
+                    bar.style.opacity = '1';
+                    bar.style.transform = 'scaleY(1.1)';
+                } else if (filter === 'all') {
+                    bar.style.opacity = '1';
+                    bar.style.transform = 'scaleY(1)';
+                } else {
+                    bar.style.opacity = '0.3';
+                    bar.style.transform = 'scaleY(0.9)';
+                }
+            });
+        }
+        
+        function updateStats(type) {
+            const stats = {
+                all: { total: 129.6, pubs: 50, tier1: 26, avg: 2.59 },
+                tier1: { total: 105, pubs: 26, tier1: 26, avg: 4.04 },
+                tier2: { total: 22.3, pubs: 20, tier1: 0, avg: 1.12 },
+                tier3: { total: 2.3, pubs: 4, tier1: 0, avg: 0.58 },
+                themes: { total: 129.6, pubs: 50, tier1: 26, avg: 2.59 },
+                timeline: { total: 129.6, pubs: 50, tier1: 26, avg: 2.59 }
+            };
+            
+            const data = stats[type] || stats.all;
+            
+            // Update counters with animation
+            document.querySelectorAll('.counter').forEach(counter => {
+                const parent = counter.parentElement.parentElement;
+                const label = parent.querySelector('.stat-label').textContent;
+                
+                let newValue;
+                if (label.includes('Inversión')) newValue = data.total;
+                else if (label.includes('Publicaciones')) newValue = data.pubs;
+                else if (label.includes('Tier 1')) newValue = data.tier1;
+                else if (label.includes('Promedio')) newValue = data.avg;
+                
+                counter.dataset.target = newValue;
+            });
+            
+            animateCounters();
+        }
+        
+        // Modal functions
+        function showDetail(type) {
+            const modal = document.getElementById('detailModal');
+            const header = document.getElementById('modalHeader');
+            const body = document.getElementById('modalBody');
+            
+            const details = {
+                total: {
+                    title: '💰 Inversión Total Detallada',
+                    content: `
+                        <p><strong>Total invertido:</strong> $129,656,504 CLP</p>
+                        <p><strong>Período:</strong> Junio - Diciembre 2023</p>
+                        <p><strong>ROI estimado:</strong> Alcance de 10M+ lectores</p>
+                        <br>
+                        <h4 style="color: #667eea;">Distribución mensual:</h4>
+                        <ul style="color: #495057;">
+                            <li>Junio: $45.2M (35%)</li>
+                            <li>Julio: $22.3M (17%)</li>
+                            <li>Agosto: $18.1M (14%)</li>
+                            <li>Septiembre: $14.5M (11%)</li>
+                            <li>Octubre: $8.9M (7%)</li>
+                            <li>Noviembre: $3.1M (2%)</li>
+                            <li>Diciembre: $17.6M (14%)</li>
+                        </ul>
+                    `
+                },
+                publications: {
+                    title: '📰 Análisis de Publicaciones',
+                    content: `
+                        <p><strong>Total:</strong> 50 publicaciones</p>
+                        <p><strong>Promedio mensual:</strong> 7.1 publicaciones</p>
+                        <br>
+                        <h4 style="color: #667eea;">Tipo de contenido:</h4>
+                        <ul style="color: #495057;">
+                            <li>Noticias: 28 (56%)</li>
+                            <li>Reportajes: 12 (24%)</li>
+                            <li>Columnas de opinión: 6 (12%)</li>
+                            <li>Entrevistas: 4 (8%)</li>
+                        </ul>
+                    `
+                },
+                reach: {
+                    title: '🎯 Alcance y Audiencia',
+                    content: `
+                        <p><strong>Alcance estimado:</strong> 10+ millones de impresiones</p>
+                        <p><strong>Medios Tier 1:</strong> 26 publicaciones</p>
+                        <br>
+                        <h4 style="color: #667eea;">Distribución de audiencia:</h4>
+                        <ul style="color: #495057;">
+                            <li>Decisores empresariales: 45%</li>
+                            <li>Sector público: 25%</li>
+                            <li>Academia: 15%</li>
+                            <li>Público general: 15%</li>
+                        </ul>
+                    `
+                },
+                average: {
+                    title: '📊 Métricas de Eficiencia',
+                    content: `
+                        <p><strong>Inversión promedio:</strong> $2,593,130 CLP</p>
+                        <p><strong>CPM estimado:</strong> $12,965 CLP</p>
+                        <br>
+                        <h4 style="color: #667eea;">Comparación por tier:</h4>
+                        <ul style="color: #495057;">
+                            <li>Tier 1: $4,039,461 promedio</li>
+                            <li>Tier 2: $1,115,524 promedio</li>
+                            <li>Tier 3: $580,000 promedio</li>
+                        </ul>
+                    `
+                }
+            };
+            
+            const detail = details[type];
+            header.textContent = detail.title;
+            body.innerHTML = detail.content;
+            modal.classList.add('active');
+        }
+        
+        function showTierDetail(tier) {
+            const modal = document.getElementById('detailModal');
+            const header = document.getElementById('modalHeader');
+            const body = document.getElementById('modalBody');
+            
+            const tierDetails = {
+                1: {
+                    title: '⭐ Tier 1 - Medios Premium',
+                    content: `
+                        <p><strong>Inversión total:</strong> $105,026,007 CLP</p>
+                        <p><strong>Publicaciones:</strong> 26</p>
+                        <p><strong>Porcentaje del total:</strong> 81%</p>
+                        <br>
+                        <h4 style="color: #667eea;">Principales medios:</h4>
+                        <ul style="color: #495057;">
+                            <li>El Mercurio: 9 publicaciones</li>
+                            <li>La Tercera: 3 publicaciones</li>
+                            <li>Diario Financiero: 4 publicaciones</li>
+                            <li>EMOL: 1 publicación</li>
+                        </ul>
+                        <br>
+                        <p><strong>Impacto:</strong> Alcance a decisores clave y formadores de opinión</p>
+                    `
+                },
+                2: {
+                    title: '📰 Tier 2 - Medios Especializados',
+                    content: `
+                        <p><strong>Inversión total:</strong> $22,310,497 CLP</p>
+                        <p><strong>Publicaciones:</strong> 20</p>
+                        <p><strong>Porcentaje del total:</strong> 17%</p>
+                        <br>
+                        <h4 style="color: #667eea;">Principales medios:</h4>
+                        <ul style="color: #495057;">
+                            <li>Portal Portuario: 11 publicaciones</li>
+                            <li>Mundo Marítimo: 9 publicaciones</li>
+                            <li>Marítimo Portuario: 3 publicaciones</li>
+                        </ul>
+                        <br>
+                        <p><strong>Impacto:</strong> Cobertura especializada del sector</p>
+                    `
+                },
+                3: {
+                    title: '📱 Tier 3 - Medios Digitales',
+                    content: `
+                        <p><strong>Inversión total:</strong> $2,320,000 CLP</p>
+                        <p><strong>Publicaciones:</strong> 4</p>
+                        <p><strong>Porcentaje del total:</strong> 2%</p>
+                        <br>
+                        <h4 style="color: #667eea;">Medios incluidos:</h4>
+                        <ul style="color: #495057;">
+                            <li>Freakopolis</li>
+                            <li>G5 Noticias</li>
+                            <li>Portal Metropolitano</li>
+                        </ul>
+                        <br>
+                        <p><strong>Impacto:</strong> Alcance digital y viralización</p>
+                    `
+                }
+            };
+            
+            const detail = tierDetails[tier];
+            header.textContent = detail.title;
+            body.innerHTML = detail.content;
+            modal.classList.add('active');
+        }
+        
+        function showMediaDetail(media, pubs, value) {
+            const modal = document.getElementById('detailModal');
+            const header = document.getElementById('modalHeader');
+            const body = document.getElementById('modalBody');
+            
+            header.textContent = `📰 ${media}`;
+            body.innerHTML = `
+                <p><strong>Publicaciones totales:</strong> ${pubs}</p>
+                <p><strong>Inversión total:</strong> $${(value/1000000).toFixed(1)}M CLP</p>
+                <p><strong>Promedio por publicación:</strong> $${((value/pubs)/1000000).toFixed(2)}M CLP</p>
+                <br>
+                <h4 style="color: #667eea;">Temas principales cubiertos:</h4>
+                <ul style="color: #495057;">
+                    <li>Desempeño logístico nacional</li>
+                    <li>Infraestructura portuaria</li>
+                    <li>Cabotaje marítimo</li>
+                    <li>Seguridad en puertos</li>
+                </ul>
+                <br>
+                <p><strong>Alcance estimado:</strong> ${(pubs * 200000).toLocaleString()} lectores</p>
+            `;
+            modal.classList.add('active');
+        }
+        
+        function showThemeDetail(theme) {
+            const modal = document.getElementById('detailModal');
+            const header = document.getElementById('modalHeader');
+            const body = document.getElementById('modalBody');
+            
+            const themeDetails = {
+                cabotaje: {
+                    title: '🚢 Cabotaje Marítimo',
+                    content: `
+                        <h4 style="color: #667eea;">Contexto:</h4>
+                        <p>CAMPORT impulsa activamente la apertura del cabotaje marítimo en Chile para reducir costos logísticos y mejorar la competitividad.</p>
+                        <br>
+                        <h4 style="color: #667eea;">Publicaciones clave:</h4>
+                        <ul style="color: #495057;">
+                            <li>18/10: "Cámara pide acelerar proyecto" - EMOL</li>
+                            <li>30/10: "Cabotaje" - El Mercurio</li>
+                            <li>09/12: "Intereses que impiden apertura" - Pulso</li>
+                        </ul>
+                        <br>
+                        <p><strong>Impacto:</strong> Posicionamiento del tema en agenda legislativa</p>
+                    `
+                },
+                logistica: {
+                    title: '📊 Desempeño Logístico',
+                    content: `
+                        <h4 style="color: #667eea;">Situación crítica:</h4>
+                        <p>Chile obtiene su peor puntaje en desempeño logístico desde 2010, evidenciando falta de planificación estratégica.</p>
+                        <br>
+                        <h4 style="color: #667eea;">Cobertura mediática:</h4>
+                        <ul style="color: #495057;">
+                            <li>02/06: Diario Financiero - Análisis en profundidad</li>
+                            <li>14/06: La Tercera - Gremios acusan falta de planificación</li>
+                            <li>19/06: Mundo Marítimo - Peor posición histórica</li>
+                        </ul>
+                        <br>
+                        <p><strong>Resultado:</strong> Presión sobre autoridades para política nacional</p>
+                    `
+                },
+                infraestructura: {
+                    title: '🏗️ Infraestructura Portuaria',
+                    content: `
+                        <h4 style="color: #667eea;">Urgencia de expansión:</h4>
+                        <p>Múltiples puertos superan 70% de ocupación, requiriendo inversiones inmediatas.</p>
+                        <br>
+                        <h4 style="color: #667eea;">Puertos críticos:</h4>
+                        <ul style="color: #495057;">
+                            <li>Valparaíso: Necesidad de expansión urgente</li>
+                            <li>San Antonio: Proyecto Puerto Exterior</li>
+                            <li>Antofagasta: Sobre 65% ocupación</li>
+                        </ul>
+                        <br>
+                        <p><strong>Inversión requerida:</strong> US$3,000+ millones</p>
+                    `
+                },
+                comercio: {
+                    title: '📉 Comercio Exterior',
+                    content: `
+                        <h4 style="color: #667eea;">Cifras preocupantes:</h4>
+                        <p>Caída de 6.8% en toneladas y 14.7% en retornos en dólares confirma estancamiento económico.</p>
+                        <br>
+                        <h4 style="color: #667eea;">Indicadores:</h4>
+                        <ul style="color: #495057;">
+                            <li>Carga movilizada: Nivel más bajo desde 2015</li>
+                            <li>Exportaciones: -6.8% en volumen</li>
+                            <li>Retorno en divisas: -14.7%</li>
+                        </ul>
+                        <br>
+                        <p><strong>Proyección 2024:</strong> Recuperación lenta esperada</p>
+                    `
+                },
+                seguridad: {
+                    title: '🔒 Seguridad Portuaria',
+                    content: `
+                        <h4 style="color: #667eea;">Amenazas crecientes:</h4>
+                        <p>Aumento del crimen organizado y narcotráfico en puertos requiere respuesta coordinada.</p>
+                        <br>
+                        <h4 style="color: #667eea;">Propuestas CAMPORT:</h4>
+                        <ul style="color: #495057;">
+                            <li>Alianza público-privada</li>
+                            <li>Tecnología de vigilancia avanzada</li>
+                            <li>Protocolos de seguridad unificados</li>
+                            <li>Capacitación especializada</li>
+                        </ul>
+                        <br>
+                        <p><strong>Meta:</strong> Reducir incidentes 50% para 2024</p>
+                    `
+                },
+                ocupacion: {
+                    title: '⚠️ Tasas de Ocupación',
+                    content: `
+                        <h4 style="color: #667eea;">Situación crítica:</h4>
+                        <p>5 puertos principales superan 70% de ocupación, afectando eficiencia operativa.</p>
+                        <br>
+                        <h4 style="color: #667eea;">Puertos en alerta:</h4>
+                        <ul style="color: #495057;">
+                            <li>TGN: 78% ocupación</li>
+                            <li>Angamos: 75% ocupación</li>
+                            <li>Antofagasta: 72% ocupación</li>
+                            <li>Valparaíso: 71% ocupación</li>
+                            <li>San Antonio: 70% ocupación</li>
+                        </ul>
+                        <br>
+                        <p><strong>Solución:</strong> Inversión urgente en ampliación de capacidad</p>
+                    `
+                }
+            };
+            
+            const detail = themeDetails[theme];
+            header.textContent = detail.title;
+            body.innerHTML = detail.content;
+            modal.classList.add('active');
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.remove('active');
+        }
+        
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
 </body>
 </html>
