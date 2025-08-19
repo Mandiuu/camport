@@ -282,29 +282,24 @@
         /* Animated bars */
         .bar-chart {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: flex-end;
-            height: 350px;
-            margin-bottom: 20px;
-            margin-top: 40px;
+            height: 250px;
             position: relative;
-            padding: 0 20px;
+            gap: 60px;
         }
         
         .bar-wrapper {
-            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-end;
             position: relative;
             cursor: pointer;
-            max-width: 120px;
-            margin: 0 15px;
+            width: 100px;
         }
         
         .bar {
-            width: 80px;
+            width: 100px;
             background: linear-gradient(180deg, #667eea, #764ba2);
             border-radius: 10px 10px 0 0;
             position: relative;
@@ -324,22 +319,29 @@
         }
         
         .bar:hover {
-            transform: scaleY(1.1);
+            transform: scaleY(1.05) translateY(-5px);
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
             filter: brightness(1.1);
         }
         
-        .bar-value {
+        .bar-value-container {
             position: absolute;
-            top: -35px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: -50px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .bar-amount {
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1.3em;
             color: #764ba2;
-            opacity: 0;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+            display: inline-block;
             animation: fadeIn 1s ease 0.5s forwards;
-            white-space: nowrap;
+            opacity: 0;
         }
         
         @keyframes fadeIn {
@@ -350,14 +352,14 @@
             margin-top: 15px;
             text-align: center;
             color: #6c757d;
-            font-size: 0.85em;
-            line-height: 1.3;
+            font-size: 0.9em;
+            line-height: 1.4;
             font-weight: 600;
         }
         
         .bar-tooltip {
             position: absolute;
-            bottom: calc(100% + 50px);
+            top: -120px;
             left: 50%;
             transform: translateX(-50%);
             background: #2c3e50;
@@ -369,8 +371,21 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s;
-            z-index: 100;
+            z-index: 1000;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .bar-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #2c3e50;
         }
         
         .bar-wrapper:hover .bar-tooltip {
@@ -712,27 +727,32 @@
                 <span class="chart-icon">📊</span>
                 Distribución por Tier (Click para detalles)
             </h3>
-            <div class="bar-chart" id="barChart">
-                <div class="bar-wrapper" onclick="showTierDetail(1)">
-                    <div class="bar-tooltip">26 publicaciones<br/>81% del valor total</div>
-                    <div class="bar" style="height: 260px;" data-tier="1">
-                        <div class="bar-value">$105M</div>
+            <div style="position: relative; padding: 80px 20px 60px 20px;">
+                <div class="bar-chart" id="barChart">
+                    <div class="bar-wrapper" onclick="showTierDetail(1)">
+                        <div class="bar-tooltip">26 publicaciones<br/>81% del valor total</div>
+                        <div class="bar-value-container">
+                            <span class="bar-amount">$105M</span>
+                        </div>
+                        <div class="bar" style="height: 250px;" data-tier="1"></div>
+                        <div class="bar-label">Tier 1<br/>Premium</div>
                     </div>
-                    <div class="bar-label">Tier 1<br/>Premium</div>
-                </div>
-                <div class="bar-wrapper" onclick="showTierDetail(2)">
-                    <div class="bar-tooltip">20 publicaciones<br/>17% del valor total</div>
-                    <div class="bar" style="height: 110px;" data-tier="2">
-                        <div class="bar-value">$22.3M</div>
+                    <div class="bar-wrapper" onclick="showTierDetail(2)">
+                        <div class="bar-tooltip">20 publicaciones<br/>17% del valor total</div>
+                        <div class="bar-value-container">
+                            <span class="bar-amount">$22.3M</span>
+                        </div>
+                        <div class="bar" style="height: 120px;" data-tier="2"></div>
+                        <div class="bar-label">Tier 2<br/>Estándar</div>
                     </div>
-                    <div class="bar-label">Tier 2<br/>Estándar</div>
-                </div>
-                <div class="bar-wrapper" onclick="showTierDetail(3)">
-                    <div class="bar-tooltip">4 publicaciones<br/>2% del valor total</div>
-                    <div class="bar" style="height: 30px;" data-tier="3">
-                        <div class="bar-value">$2.3M</div>
+                    <div class="bar-wrapper" onclick="showTierDetail(3)">
+                        <div class="bar-tooltip">4 publicaciones<br/>2% del valor total</div>
+                        <div class="bar-value-container">
+                            <span class="bar-amount">$2.3M</span>
+                        </div>
+                        <div class="bar" style="height: 40px;" data-tier="3"></div>
+                        <div class="bar-label">Tier 3<br/>Básico</div>
                     </div>
-                    <div class="bar-label">Tier 3<br/>Básico</div>
                 </div>
             </div>
         </div>
@@ -948,6 +968,7 @@
                 const mediaList = document.getElementById('mediaList');
                 const barChart = document.getElementById('barChartContainer');
                 const timelineSection = document.getElementById('timelineSection');
+                const statsGrid = document.querySelector('.stats-grid');
                 
                 // Hide all sections first
                 themesSection.style.display = 'none';
@@ -957,11 +978,14 @@
                 
                 if (type === 'themes') {
                     themesSection.style.display = 'block';
+                    statsGrid.style.display = 'none';
                 } else if (type === 'timeline') {
                     timelineSection.style.display = 'block';
+                    statsGrid.style.display = 'none';
                 } else {
                     mediaList.style.display = 'block';
                     barChart.style.display = 'block';
+                    statsGrid.style.display = 'grid';
                     
                     // Animate bars
                     if (type !== 'all') {
@@ -969,8 +993,10 @@
                     }
                 }
                 
-                // Update stats
-                updateStats(type);
+                // Update stats only for main filters
+                if (type !== 'themes' && type !== 'timeline') {
+                    updateStats(type);
+                }
             }, 500);
         }
         
